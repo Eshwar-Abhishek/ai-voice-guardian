@@ -1,85 +1,63 @@
-// 🎤 Mic Input
+function analyze() {
+    const btn = event.target;
+
+    // 🔥 Add click animation
+    btn.classList.add("glow");
+
+    setTimeout(() => {
+        btn.classList.remove("glow");
+    }, 800);
+
+    const text = document.getElementById("text").value;
+
+    fetch("https://ai-voice-guardian-1.onrender.com/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        let color = "";
+        if (data.risk === "HIGH RISK") color = "red";
+        else if (data.risk === "MEDIUM RISK") color = "orange";
+        else color = "green";
+
+        const resultDiv = document.getElementById("result");
+
+        // ✨ Fade animation
+        resultDiv.style.opacity = 0;
+
+        setTimeout(() => {
+            resultDiv.innerHTML = `
+                <div style="color:${color}; font-size:22px;">
+                    ${data.risk}
+                </div>
+                <div>${data.message}</div>
+                <small>Keywords: ${data.keywords.join(", ")}</small>
+            `;
+            resultDiv.style.opacity = 1;
+        }, 200);
+
+        if (data.audio) {
+            const audio = document.getElementById("audio");
+            audio.src = data.audio;
+            audio.play();
+        }
+    });
+}
+
+// 🎤 Voice Input
 function startListening() {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
     recognition.lang = "en-US";
 
-    recognition.onresult = function (event) {
-        const text = event.results[0][0].transcript;
-        document.getElementById("userInput").value = text;
-        sendText();
+    recognition.onresult = function(event) {
+        document.getElementById("text").value = event.results[0][0].transcript;
     };
 
     recognition.start();
-}
-
-
-// 🚀 Send text to backend
-async function sendText() {
-    const input = document.getElementById("userInput").value;
-
-    if (!input) return;
-
-    try {
-        const response = await fetch("http://127.0.0.1:8000/process", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ text: input })
-        });
-
-        const data = await response.json();
-
-        console.log(data);
-
-        // ✅ Show response
-        document.getElementById("result").innerText = data.response;
-
-        // ✅ Risk bar (REAL VALUE)
-        updateRiskBar(data.risk);
-
-        // ✅ Alert
-        showAlert(data.risk);
-
-        // ✅ Play audio
-        playAudio(data.audio);
-
-    } catch (error) {
-        console.error(error);
-        document.getElementById("result").innerText = "❌ Backend not running!";
-    }
-}
-
-
-// 📊 Risk Bar
-function updateRiskBar(risk) {
-    const bar = document.getElementById("riskBar");
-
-    bar.style.width = risk + "%";
-
-    if (risk > 70) bar.style.background = "red";
-    else if (risk > 40) bar.style.background = "orange";
-    else bar.style.background = "green";
-}
-
-
-// 🚨 Alert system
-function showAlert(risk) {
-    if (risk > 75) {
-        alert("🚨 HIGH RISK DETECTED!");
-
-        let sound = new Audio("https://www.soundjay.com/button/beep-07.wav");
-        sound.play();
-    }
-}
-
-
-// 🔊 Play audio
-function playAudio(audioData) {
-    if (!audioData) return;
-
-    if (audioData.audio_url) {
-        const audio = new Audio(audioData.audio_url);
-        audio.play();
-    }
 }
