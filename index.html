@@ -1,44 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI Voice Guardian</title>
-  <link rel="stylesheet" href="style.css">
+    <title>AI Voice Guardian</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-
-  <div class="card">
+<div class="card">
     <h1>🎤 AI Voice Guardian</h1>
-    <p class="subtitle">Real-time AI Safety Assistant 🚀</p>
 
-    <!-- Input -->
-    <input type="text" id="userInput" placeholder="Type or speak something..." />
+    <textarea id="text" placeholder="Speak or paste conversation..."></textarea>
 
-    <!-- Buttons -->
     <div class="buttons">
-      <button onclick="sendText()">Send</button>
-      <button onclick="startListening()">🎙️ Speak</button>
+        <button onclick="startListening()">🎙 Speak</button>
+        <button onclick="analyze()">Analyze</button>
     </div>
 
-    <!-- Response -->
-    <div class="response-box">
-      <p id="result">AI response will appear here...</p>
-    </div>
+    <div id="result"></div>
 
-    <!-- Risk Meter -->
-    <div class="risk-section">
-      <p>Risk Level</p>
-      <div class="risk-container">
-        <div id="riskBar"></div>
-      </div>
-    </div>
-
-  </div>
-
+    <audio id="audio" controls></audio>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
