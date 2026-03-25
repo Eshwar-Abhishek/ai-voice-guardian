@@ -11,44 +11,40 @@ function analyze() {
     const text = document.getElementById("text").value;
 
     fetch("https://ai-voice-guardian-1.onrender.com/analyze", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text })
-    })
-    .then(res => res.json())
-    .then(data => {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ text: text })
+})
+.then(res => {
+    if (!res.ok) {
+        throw new Error("API Error: " + res.status);
+    }
+    return res.json();
+})
+.then(data => {
 
-        let color = "";
-        if (data.risk === "HIGH RISK") color = "red";
-        else if (data.risk === "MEDIUM RISK") color = "orange";
-        else color = "green";
+    let keywords = data.keywords || [];  // ✅ FIX CRASH
 
-        const resultDiv = document.getElementById("result");
+    let color = "";
+    if (data.risk === "HIGH RISK") color = "red";
+    else if (data.risk === "MEDIUM RISK") color = "orange";
+    else color = "green";
 
-        // ✨ Fade animation
-        resultDiv.style.opacity = 0;
-
-        setTimeout(() => {
-            resultDiv.innerHTML = `
-                <div style="color:${color}; font-size:22px;">
-                    ${data.risk}
-                </div>
-                <div>${data.message}</div>
-                <small>Keywords: ${data.keywords.join(", ")}</small>
-            `;
-            resultDiv.style.opacity = 1;
-        }, 200);
-
-        if (data.audio) {
-            const audio = document.getElementById("audio");
-            audio.src = data.audio;
-            audio.play();
-        }
-    });
-}
-
+    document.getElementById("result").innerHTML = `
+        <div style="color:${color}; font-size:22px;">
+            ${data.risk}
+        </div>
+        <div>${data.message}</div>
+        <small>Keywords: ${keywords.join(", ")}</small>
+    `;
+})
+.catch(err => {
+    console.error(err);
+    document.getElementById("result").innerHTML =
+        "❌ Error connecting to backend. Check API.";
+});
 // 🎤 Voice Input
 function startListening() {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
